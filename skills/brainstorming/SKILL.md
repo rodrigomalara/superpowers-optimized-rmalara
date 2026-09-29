@@ -26,7 +26,7 @@ Every project goes through this process. A todo list, a single-function utility,
 1. Inspect project context (relevant files, docs, recent commits).
 2. Assess scope: if the project touches 4+ independent subsystems or would require 20+ implementation tasks, decompose into sub-projects. Design each sub-project as a separate spec. Present the decomposition to the user for approval before designing individual specs.
 3. Ask all clarifying questions together in a single turn. Use multiple-choice format where possible to reduce round trips.
-4. Propose 2-3 approaches with trade-offs and a recommendation.
+4. If the user has not specified an approach, propose 2-3 with trade-offs and a recommendation. If the user has specified one, do not generate alternatives: evaluate the stated approach, state what it costs and where it breaks, and design against it unless it cannot meet the requirements. An approach you consider better but were not asked for belongs in non-goals as a deferred option — name it once; do not re-argue it across turns.
 5. Present design in short sections; confirm each section.
 6. For existing codebases: study existing patterns before proposing new ones. Match the project's conventions unless there's a compelling reason to diverge. Design for isolation — prefer changes that minimize blast radius and don't require coordinating across many files.
 7. If the repo lacks `CLAUDE.md` / `AGENTS.md` and long-term collaboration is expected, consider using `claude-md-creator` to create a minimal, high-signal context file.
@@ -116,8 +116,8 @@ Apply senior engineering judgment during design:
 - Verify requirements are complete and unambiguous before designing.
 - Identify edge cases, error paths, and cross-platform concerns early.
 - Evaluate trade-offs explicitly (performance vs. readability, flexibility vs. simplicity).
-- Prioritize modularity, SOLID principles, and production-ready standards.
-- Flag architectural risks that will be expensive to fix later.
+- Apply modularity and SOLID where the requirements call for them. They are tools, not targets. Match the existing codebase's level of abstraction rather than raising it.
+- Flag architectural risks that will be expensive to fix later — flag only. Acting on one is a separate decision for the user, not an addition to this design.
 
 ## Interaction Rules
 

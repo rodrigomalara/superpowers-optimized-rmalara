@@ -1,3 +1,7 @@
+> **This is a fork.** Three skills — `writing-plans`, `brainstorming` and
+> `subagent-driven-development` — are modified to remove structural pressure
+> toward scope creep. See [FORK.md](FORK.md). Everything else is upstream.
+
 <div align="center">
 
 [![AI Coding Agents](https://img.shields.io/badge/USE_WITH-Claude_Code_%7C_Codex_%7C_OpenCode_%7C_Gemini_CLI_%7C_Antigravity-white?style=for-the-badge)]()

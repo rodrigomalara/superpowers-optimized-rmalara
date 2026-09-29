@@ -120,7 +120,7 @@ Batching is distinct from a parallel wave: a wave runs N subagents at once, a ba
 **One reviewer per task, two mandatory verdicts.** A single reviewer reads the task's diff once and returns both:
 
 - **Spec verdict** — does the implementation match the task's requirements? Missing scope and extra scope both count.
-- **Quality verdict** — correctness, tests, error handling, maintainability.
+- **Quality verdict** — correctness, tests, error handling, and maintainability. Maintainability is reported, not enforced: structural preferences are capped at Minor and never gate a task.
 
 Both are required. A review returning only one verdict is incomplete — send it back. Two separate reviewers were previously dispatched here; they read the same diff and the same task text, rebuilt the same context twice, and split findings across two fix round-trips that one reviewer surfaces in one. The reviewer template's Spec Alignment section already covers what the separate spec reviewer was asked to do.
 
@@ -139,6 +139,7 @@ A fix round is one fix dispatch plus one re-review. **Five rounds maximum per ta
 - **Rounds 1–3:** send the open findings to the implementer that did the work. Its context is intact — it knows the task, the code, and its own choices.
 - **Rounds 4–5:** dispatch a fresh implementer on a more capable model, telling it plainly that prior attempts failed and what was tried. A loop surviving three rounds usually means the implementer cannot see its own problem; fresh eyes plus a capability bump in one move.
 - **Minor findings never enter the loop.** Record them and pass the list to the final whole-branch review to triage.
+- **Findings that exceed the task's requirements never enter the loop**, at any severity. The loop makes a task meet its brief; it does not extend the brief. Record these in the plan's `## Deferred` section and continue.
 
 **When round 5 still leaves findings open, stop dispatching** and decide each one yourself:
 

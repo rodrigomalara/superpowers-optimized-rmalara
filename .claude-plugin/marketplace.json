@@ -1,26 +1,43 @@
 {
-  "name": "superpowers-optimized",
+  "name": "superpowers-optimized-rmalara",
   "owner": {
-    "name": "Jesse Vincent, forked by REPOZY"
+    "name": "Jesse Vincent, forked by REPOZY, with minor modifications by Rodrigo Malara"
   },
   "metadata": {
-    "description": "Agentic development framework — disciplined workflow routing, TDD enforcement, safety hooks, systematic debugging, and code review"
+    "description": "Agentic development framework \u2014 disciplined workflow routing, TDD enforcement, safety hooks, systematic debugging, and code review"
   },
   "plugins": [
     {
       "name": "superpowers-optimized",
-      "description": "Agentic development framework for Claude Code — disciplined workflow routing, TDD enforcement, safety hooks, systematic debugging, and code review",
-      "version": "6.8.1",
+      "description": "Agentic development framework for Claude Code, with scope-creep controls in planning and review \u2014 disciplined workflow routing, TDD enforcement, safety hooks, systematic debugging, and code review",
+      "version": "6.8.1-scope.1",
       "source": "./",
       "author": {
-        "name": "REPOZY"
+        "name": "Rodrigo Malara"
       },
-      "homepage": "https://github.com/REPOZY/superpowers-optimized",
-      "repository": "https://github.com/REPOZY/superpowers-optimized",
+      "homepage": "https://github.com/rodrigomalara/superpowers-optimized-rmalara",
+      "repository": "https://github.com/rodrigomalara/superpowers-optimized-rmalara",
       "license": "MIT",
       "category": "productivity",
-      "keywords": ["skills", "tdd", "debugging", "code-review", "workflows", "agentic", "token-efficiency", "hooks", "safety", "subagent"],
-      "tags": ["superpowers", "claude-code", "cursor", "codex", "agent-workflow"]
+      "keywords": [
+        "skills",
+        "tdd",
+        "debugging",
+        "code-review",
+        "workflows",
+        "agentic",
+        "token-efficiency",
+        "hooks",
+        "safety",
+        "subagent"
+      ],
+      "tags": [
+        "superpowers",
+        "claude-code",
+        "cursor",
+        "codex",
+        "agent-workflow"
+      ]
     }
   ]
 }
