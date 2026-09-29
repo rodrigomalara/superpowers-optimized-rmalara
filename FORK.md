@@ -10,8 +10,12 @@ plugin useful is Jesse Vincent's and REPOZY's work.
 
 It changes three skills — `writing-plans`, `brainstorming` and
 `subagent-driven-development` — to remove structural pressure toward scope creep in
-implementation plans and in the review gates that execute them. Everything else is
-upstream.
+implementation plans and in the review gates that execute them, and adds one skill,
+`changing-existing-behavior`, for changes that reach consumers outside the codebase.
+Everything else is upstream.
+
+This is a personal build, maintained for my own use. It is not a proposal to REPOZY
+and there is no PR pending.
 
 ## The problem
 
@@ -113,6 +117,21 @@ requirements never enters the fix loop, whatever its severity. The loop makes a 
 meet its brief; it does not extend the brief. Such findings are recorded in the plan's
 Deferred section instead.
 
+### `skills/changing-existing-behavior/` (new)
+
+Scope creep and behavior breakage are different failures with different fixes. The
+patches above reduce the first. This skill addresses the second: before a change that
+can reach a consumer outside the codebase, classify it — additive, contract shape
+change, policy change with unknown consumers, coordinated change, or internal-only —
+state the classification, and stop for a decision rather than building a rollout
+mechanism unasked.
+
+Where a mechanism is approved, it fixes the parts that are usually skipped: the safe
+state must be proven byte-identical with a characterization test written before the
+change exists, shadow mode must emit a metric with a caller dimension rather than a log
+line, and the exit criterion is a number stated up front instead of "we watched it for
+a while".
+
 ## What is deliberately not changed
 
 Three further candidates were identified and left alone, because each trades against
@@ -149,15 +168,15 @@ not whether it restrains, and will not answer this.
 
 ## Relationship to upstream
 
-These are general-purpose fixes, not local preferences, and the intent is to offer
-them upstream. If REPOZY takes them, this fork should go away.
-
-Upstream tracking:
+This build tracks REPOZY's and takes its improvements; it does not feed anything back.
+The changes here are opinionated about scope discipline in a way upstream may not
+share, and keeping them local avoids arguing the point.
 
 ```bash
 git remote add upstream https://github.com/REPOZY/superpowers-optimized.git
-gh repo sync <user>/<your-fork>
+git fetch upstream && git merge upstream/main
 ```
 
-Changes are confined to two files, so upstream merges conflict only where the skill
-text actually moved — which is the desired behavior, since it forces a re-read.
+Changes are confined to a handful of files, so upstream merges conflict only where the
+skill text actually moved — which is the desired behavior, since it forces a re-read of
+whatever upstream rewrote.
