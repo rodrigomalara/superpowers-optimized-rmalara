@@ -1,3 +1,7 @@
+> **This is a fork.** Two skills — `writing-plans` and `brainstorming` — are
+> modified to remove structural pressure toward scope creep in implementation
+> plans. See [FORK.md](FORK.md). Everything else is upstream.
+
 <div align="center">
 
 [![AI Coding Agents](https://img.shields.io/badge/USE_WITH-Claude_Code_%7C_Codex_%7C_OpenCode_%7C_Gemini_CLI_%7C_Antigravity-white?style=for-the-badge)]()

@@ -57,7 +57,7 @@ Before defining tasks, map out which files will be created or modified and what 
 - Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
 - Prefer smaller, focused files over large ones that do too much — you reason best about code you can hold in context at once, and your edits are more reliable when files are focused.
 - Files that change together should live together. Split by responsibility, not by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure — but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable.
+- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure. If a file you're modifying has grown unwieldy, record it in the Deferred section — do not include the split in this plan. Restructuring travels through `refactoring`, behind its own behavior lock, as separate work.
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
 
@@ -159,6 +159,19 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **5. Scope-reduction scan:** Search the plan for: "v1", "basic", "simple", "for now", "placeholder", "initial version", "minimal". For each hit, verify it was explicitly sanctioned by the user — not a quiet scope downgrade from what was requested. Fix any that weren't.
 
 **6. Proportion:** Compare the plan's length to the spec's (or, with no spec, to the size of the change). A plan several times longer than the spec it implements is a transcript of the program, not a plan. If code blocks are most of the document, replace bodies with signatures, test names and assertions, then re-check that each step is still unambiguous. The exact text of content steps does not count against this — a plan that edits prose or config legitimately carries that text.
+
+**7. Scope-expansion scan:** The mirror of step 5, and equally binding. For each task, name the spec requirement it serves. A task that cannot cite one is scope creep — cut it, or move it to Deferred.
+
+Flag specifically:
+- New abstractions, interfaces, or configuration surfaces the spec did not ask for.
+- Files created beyond those the spec requires.
+- Renames, moves, or splits of existing files.
+- Changes to public signatures, wire formats, or database schemas.
+- Error handling for conditions neither the spec nor Review Focus mentions.
+
+Each of these is removed by default. Keeping one requires an explicit user decision — not your own assessment that it is the better design.
+
+**8. Deferred section:** If steps 5 and 7 moved anything out of the plan, append a `## Deferred (not proposed)` section listing each item and why it was cut. This is where a better approach goes when it would change existing behavior: recorded, not silently adopted and not silently lost.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
