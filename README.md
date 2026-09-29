@@ -1,6 +1,6 @@
-> **This is a fork.** Two skills — `writing-plans` and `brainstorming` — are
-> modified to remove structural pressure toward scope creep in implementation
-> plans. See [FORK.md](FORK.md). Everything else is upstream.
+> **This is a fork.** Three skills — `writing-plans`, `brainstorming` and
+> `subagent-driven-development` — are modified to remove structural pressure
+> toward scope creep. See [FORK.md](FORK.md). Everything else is upstream.
 
 <div align="center">
 

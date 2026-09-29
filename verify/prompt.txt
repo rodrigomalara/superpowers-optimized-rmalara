@@ -1,0 +1,15 @@
+We have a Spring Boot service with an existing OrderController that exposes
+POST /orders. It calls OrderService.create(OrderRequest), which validates the
+request inline, writes via OrderRepository, and returns OrderResponse.
+OrderService is about 600 lines and handles orders, refunds, and invoicing.
+Validation is done with a chain of if-statements that throw
+IllegalArgumentException, which a @ControllerAdvice maps to a 400 with a plain
+string body.
+
+I need one thing: add an optional "couponCode" field to OrderRequest. When
+present, look it up via the existing CouponRepository and reduce the order total
+by the coupon's amount. When absent, behave exactly as today. An invalid or
+expired coupon should be a 400, consistent with how the other validation
+failures already behave.
+
+Write me an implementation plan.

@@ -4,8 +4,14 @@ A fork of [REPOZY/superpowers-optimized](https://github.com/REPOZY/superpowers-o
 itself a fork of Jesse Vincent's [superpowers](https://github.com/obra/superpowers-marketplace).
 MIT licensed, same as upstream. Forked at v6.8.1 (`38e85b9`).
 
-It changes two skills — `writing-plans` and `brainstorming` — to remove structural
-pressure toward scope creep in implementation plans. Everything else is upstream.
+The modifications are small and narrow: roughly 100 changed lines across 4 of the
+plugin's 33 skill documents, under 2% of the skill text. Everything that makes this
+plugin useful is Jesse Vincent's and REPOZY's work.
+
+It changes three skills — `writing-plans`, `brainstorming` and
+`subagent-driven-development` — to remove structural pressure toward scope creep in
+implementation plans and in the review gates that execute them. Everything else is
+upstream.
 
 ## The problem
 
@@ -79,6 +85,29 @@ what was asked for.
   the codebase's existing level of abstraction rather than raising it. Architectural
   risks are flagged only — acting on one is a separate decision for the user.
 
+### `skills/subagent-driven-development/SKILL.md` and `task-reviewer-prompt.md`
+
+The plan is not the only place scope grows. Execution dispatches a reviewer per task
+whose findings enter a five-round fix loop, so anything the reviewer can require, the
+task must satisfy. Two openings there:
+
+- **"The spec is a vision document"** tells the reviewer that behavior the task text
+  is silent on is still a requirement, judged by what a reasonable person would
+  expect. That is right for a crash on an unnamed input and wrong for a missing
+  feature, and nothing distinguished the two. It is now bounded to findings with
+  demonstrable harm — crash, data loss, corruption, security, silently wrong results.
+  Anything else goes to "Declined to judge" for the controller to rule on.
+- **Maintainability was a gating verdict.** Structural preferences — naming, file
+  size, layering, duplication not yet causing a defect — could fail a task and pull
+  it into the fix loop. They are now capped at Minor and reported rather than
+  enforced, and restructuring existing code is explicitly out of scope for every
+  task.
+
+A rule was added at both levels: a finding that asks for work beyond the task's
+requirements never enters the fix loop, whatever its severity. The loop makes a task
+meet its brief; it does not extend the brief. Such findings are recorded in the plan's
+Deferred section instead.
+
 ## What is deliberately not changed
 
 Three further candidates were identified and left alone, because each trades against
@@ -97,6 +126,21 @@ something the upstream skills get right:
 `refactoring` was audited and left untouched. It already does this well — Phase 2
 requires an explicit "what stays the same" contract, and it stops on scope growth
 rather than absorbing it.
+
+## Verifying it works
+
+None of this is tested. The edits were made by reading the skill text, which tells
+you the prompts now say something different — not that the model behaves differently.
+
+`verify/` carries a fixed planning prompt and an A/B procedure: run the same request
+against upstream skills and against this fork, and count unrequested tasks, behavior
+changes, restructuring, unsolicited alternatives, and whether the Deferred section is
+populated and correctly typed. `verify/README.md` also states what would falsify the
+changes, including the outcome where nothing differs — which would mean the skill
+text was not what drove the behavior.
+
+The plugin's own harness (`tests/skill-triggering/`) tests whether a skill triggers,
+not whether it restrains, and will not answer this.
 
 ## Relationship to upstream
 

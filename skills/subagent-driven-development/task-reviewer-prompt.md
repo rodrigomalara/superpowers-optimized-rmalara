@@ -69,6 +69,13 @@ Agent tool (general-purpose):
     text mentions the trigger. A crash on an input the spec never named is not
     Minor because the spec never named it.
 
+    This reasoning is bounded. It admits findings where unspecified input
+    produces a crash, data loss, corruption, a security hole, or a silently
+    wrong result. It does not admit missing features, absent configurability,
+    or behavior you would have specified differently. If you cannot name the
+    concrete harm to a real user, it is not a finding under this section —
+    put it under "Declined to judge" and let the controller rule on it.
+
     ## Declined to judge
 
     Before your verdicts, list every behavior you considered and set aside as
@@ -89,7 +96,12 @@ Agent tool (general-purpose):
     - Correctness, and regression risk in surrounding code
     - Error handling and edge cases
     - Tests verify real behavior, not mock behavior; failure paths covered
-    - Separation of concerns; DRY without premature abstraction
+    - Separation of concerns; DRY without premature abstraction. Structural
+      preferences — naming, file size, layering, duplication that is not yet
+      causing a defect — are capped at Minor. Grade one above Minor only by
+      naming the correctness or security failure it already causes, not the
+      one it might cause later. Restructuring existing code is out of scope
+      for every task: report it, never require it.
     - Security concerns in anything touching auth, input, secrets, or data access
 
     **If this was a batched dispatch** (one subagent, several same-shape edits):
@@ -148,3 +160,4 @@ Agent tool (general-purpose):
 1. Resolve every "Cannot verify from diff" item yourself before marking the task complete. A confirmed gap becomes a failed spec verdict.
 2. Rule on every "Declined to judge" line — record the decision; never drop one silently.
 3. Minor findings do not enter the fix loop. Record them and hand the list to the final whole-branch review.
+4. A finding that asks for work beyond the task's requirements does not enter the fix loop either, whatever its severity. Record it in the plan's `## Deferred` section as a bug or a cut change, and carry on. The fix loop exists to make the task meet its brief — not to grow the brief.
