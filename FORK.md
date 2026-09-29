@@ -71,6 +71,11 @@ what was asked for.
   carries what it would touch, why it was cut, and what it would actually buy, where
   `unclear` is an allowed and informative answer. Entries never propose a fix or
   estimate effort: the section is a record the reader can act on, not a second plan.
+- **A `Must not change:` field in the plan header.** The header carried Goal,
+  Architecture, Tech Stack, Spec and Assumptions — nothing stating what the plan
+  promises to leave alone. A plan could satisfy every other rule and still never
+  declare its behavior contract. The field asks for it concretely, and any task
+  touching one of the named things has to say so.
 - **The file-split license is removed.** An unwieldy file is left alone and recorded as
   a cut change; restructuring travels through `refactoring`, which locks behavior with
   tests first, as separate work.
