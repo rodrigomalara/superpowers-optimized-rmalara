@@ -57,7 +57,7 @@ Before defining tasks, map out which files will be created or modified and what 
 - Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
 - Prefer smaller, focused files over large ones that do too much — you reason best about code you can hold in context at once, and your edits are more reliable when files are focused.
 - Files that change together should live together. Split by responsibility, not by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure. If a file you're modifying has grown unwieldy, record it in the Deferred section — do not include the split in this plan. Restructuring travels through `refactoring`, behind its own behavior lock, as separate work.
+- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure. If a file you're modifying has grown unwieldy, leave it alone: keep the split out of this plan and record it under step 8. Restructuring travels through `refactoring`, behind its own behavior lock, as separate work.
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
 
@@ -160,7 +160,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **6. Proportion:** Compare the plan's length to the spec's (or, with no spec, to the size of the change). A plan several times longer than the spec it implements is a transcript of the program, not a plan. If code blocks are most of the document, replace bodies with signatures, test names and assertions, then re-check that each step is still unambiguous. The exact text of content steps does not count against this — a plan that edits prose or config legitimately carries that text.
 
-**7. Scope-expansion scan:** The mirror of step 5, and equally binding. For each task, name the spec requirement it serves. A task that cannot cite one is scope creep — cut it, or move it to Deferred.
+**7. Scope-expansion scan:** The mirror of step 5, and equally binding. For each task, name the spec requirement it serves. A task that cannot cite one is scope creep — cut it from the plan and record it under step 8.
 
 Flag specifically:
 - New abstractions, interfaces, or configuration surfaces the spec did not ask for.
@@ -171,7 +171,34 @@ Flag specifically:
 
 Each of these is removed by default. Keeping one requires an explicit user decision — not your own assessment that it is the better design.
 
-**8. Deferred section:** If steps 5 and 7 moved anything out of the plan, append a `## Deferred (not proposed)` section listing each item and why it was cut. This is where a better approach goes when it would change existing behavior: recorded, not silently adopted and not silently lost.
+**8. Deferred section:** Append a `## Deferred` section recording exactly two kinds of finding:
+
+- **bug** — existing behavior that is already wrong, noticed while reading the code. Not caused by this plan.
+- **scope-creep** — a change cut by step 7. Recorded so it is visible, not so it is argued for.
+
+Nothing else belongs here. Write the section whenever you have such a finding; omit it entirely when you have none, and never pad it.
+
+One entry per finding. Two related bugs are two entries.
+
+```markdown
+- **[bug]** <one-line summary>
+  - **Where:** `path/to/file.ext:line`
+  - **Now:** what the code does today
+  - **Expected:** what a reasonable reader would expect instead
+  - **Confidence:** `verified` — you read the code path and it is wrong — or `suspected`, you have not confirmed it
+  - **Impact:** who or what hits this, under what conditions
+
+- **[scope-creep]** <one-line summary of the change that was cut>
+  - **Would touch:** the files, interfaces, or behavior it would change
+  - **Cut because:** not required by the spec / would change existing behavior / not sanctioned by the user
+  - **Would gain:** what it would actually buy, in one line — or `unclear`, which is itself the answer
+```
+
+Rules for this section:
+
+- Never write `verified` without having read the code path. `suspected` is the honest default and costs nothing.
+- Do not propose a fix and do not estimate effort. This is a record for the reader to act on, not a second plan.
+- Record a scope-creep entry once and move on. Do not restate it elsewhere in the plan or re-argue it in conversation.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 

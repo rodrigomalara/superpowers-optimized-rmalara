@@ -58,11 +58,16 @@ what was asked for.
   moves, changes to public signatures or wire formats or schemas, and error handling
   for unmentioned conditions are removed by default. Keeping one takes an explicit
   user decision, not the model's own assessment that it is better.
-- **A `## Deferred (not proposed)` section** collects whatever the scans remove. This
-  matters: without somewhere to put a better idea, it leaks back into the plan. The
-  idea gets recorded rather than silently adopted or silently lost.
-- **The file-split license is removed.** Splits route to Deferred, and from there to
-  `refactoring`, which locks behavior with tests first.
+- **A `## Deferred` section** records exactly two kinds of finding: **bugs** (existing
+  behavior already wrong, noticed while reading the code) and **scope-creep** (changes
+  the expansion scan cut). Each kind has a fixed entry shape — a bug carries location,
+  now vs expected, a `verified`/`suspected` confidence flag and impact; a cut change
+  carries what it would touch, why it was cut, and what it would actually buy, where
+  `unclear` is an allowed and informative answer. Entries never propose a fix or
+  estimate effort: the section is a record the reader can act on, not a second plan.
+- **The file-split license is removed.** An unwieldy file is left alone and recorded as
+  a cut change; restructuring travels through `refactoring`, which locks behavior with
+  tests first, as separate work.
 
 ### `skills/brainstorming/SKILL.md`
 
