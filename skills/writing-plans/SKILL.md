@@ -30,6 +30,7 @@ Save to `docs/plans/YYYY-MM-DD-<feature-name>.md`.
 **Tech Stack:** <languages/libraries/tools>
 **Spec:** <path to the design doc this plan implements, or `none` if there isn't one. The plan argues from the spec, so the spec travels with it — executors read both, and plan conflicts resolve against the spec.>
 **Assumptions:** <list the key assumptions this plan rests on. For each, state what it excludes: "Assumes X — will NOT work if Y."> *(skip only if the plan contains zero conditional logic)*
+**Must not change:** <the behavior contract: existing callers, public interfaces, response shapes, stored formats and tests that must be identical after this plan is implemented. Name them concretely — "the POST /orders response shape" beats "existing behavior". Any task that touches one of these states so in its own body, with the reason. Write `nothing observable` only when the change is genuinely invisible outside the code it edits.>
 
 ## Global Constraints
 
