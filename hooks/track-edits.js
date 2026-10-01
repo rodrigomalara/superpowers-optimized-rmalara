@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { isInGitExclude } = require('./git-exclude');
 
 const LOG_DIR = path.join(
   process.env.HOME || process.env.USERPROFILE || '.',
@@ -33,6 +34,8 @@ function ensureGitignored(filePath, cwd) {
     if (!AI_ARTIFACTS.includes(basename)) return;
 
     const dir = filePath && path.isAbsolute(filePath) ? path.dirname(filePath) : (cwd || '.');
+    if (isInGitExclude(dir, basename)) return; // already ignored locally — keep .gitignore untouched
+
     const gitignorePath = path.join(dir, '.gitignore');
 
     let content = '';

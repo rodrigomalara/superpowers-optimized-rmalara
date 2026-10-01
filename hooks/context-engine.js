@@ -20,6 +20,7 @@ const { execSync } = require('child_process');
 const { createHash } = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { isInGitExclude } = require('./git-exclude');
 
 const MAX_FILES = 10;    // cap blast radius queries to avoid slowness on large diffs
 const MIN_NAME_LEN = 3;  // skip very short filenames to avoid false-positive grep hits
@@ -126,6 +127,8 @@ function run(cmd, cwd) {
 
 function ensureGitignored(cwd) {
   try {
+    if (isInGitExclude(cwd, 'context-snapshot.json')) return; // already ignored locally — keep .gitignore untouched
+
     const gitignorePath = path.join(cwd, '.gitignore');
     let content = fs.existsSync(gitignorePath)
       ? fs.readFileSync(gitignorePath, 'utf8')
