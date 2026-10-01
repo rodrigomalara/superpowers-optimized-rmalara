@@ -1,6 +1,19 @@
-> **This is a fork.** Three skills — `writing-plans`, `brainstorming` and
-> `subagent-driven-development` — are modified to remove structural pressure
-> toward scope creep. See [FORK.md](FORK.md). Everything else is upstream.
+> **This is a fork** of [REPOZY/superpowers-optimized](https://github.com/REPOZY/superpowers-optimized),
+> forked at v6.8.1. Differences from upstream (rationale in [FORK.md](FORK.md)):
+>
+> - **`writing-plans`** — a scope-expansion scan mirrors the existing scope-reduction
+>   scan; a `Must not change:` header field; a `## Deferred` section for bugs and cut
+>   changes; no license to split files inside a feature plan.
+> - **`brainstorming`** — alternatives are proposed only when the user has not chosen an
+>   approach; Engineering Rigor matches the codebase's abstraction level instead of raising it.
+> - **`subagent-driven-development`** — reviewer findings beyond the task's requirements
+>   never enter the fix loop; maintainability findings are capped at Minor.
+> - **`changing-existing-behavior`** (new skill) — classify a change that reaches outside
+>   consumers and stop for a rollout decision.
+> - **Hooks** — `track-edits` and `context-engine` skip the `.gitignore` append when the
+>   file is already listed in `.git/info/exclude`.
+>
+> Everything else is upstream.
 
 <div align="center">
 

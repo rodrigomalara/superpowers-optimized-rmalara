@@ -12,6 +12,7 @@ It changes three skills — `writing-plans`, `brainstorming` and
 `subagent-driven-development` — to remove structural pressure toward scope creep in
 implementation plans and in the review gates that execute them, and adds one skill,
 `changing-existing-behavior`, for changes that reach consumers outside the codebase.
+One hook behavior also changes: the `.gitignore` auto-append respects `.git/info/exclude`.
 Everything else is upstream.
 
 This is a personal build, maintained for my own use. It is not a proposal to REPOZY
@@ -131,6 +132,17 @@ state must be proven byte-identical with a characterization test written before 
 change exists, shadow mode must emit a metric with a caller dimension rather than a log
 line, and the exit criterion is a number stated up front instead of "we watched it for
 a while".
+
+### `hooks/track-edits.js` and `hooks/context-engine.js`
+
+Both hooks append the files they write (`state.md`, `session-log.md`, `project-map.md`,
+`known-issues.md`, `context-snapshot.json`) to the project's tracked `.gitignore`. In a
+repository where those files are already ignored locally through `.git/info/exclude`, that
+turns a personal preference into a diff in a shared file — one that lands in commits. Both
+now check `.git/info/exclude` first (via the shared `hooks/git-exclude.js`, resolved with
+`git rev-parse --git-path` so worktrees work) and leave `.gitignore` alone when the file is
+listed there, by bare name or as `/name`. Outside a git repository, or when the file is not
+listed, the append happens as before.
 
 ## What is deliberately not changed
 
