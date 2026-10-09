@@ -20,6 +20,8 @@ const {
   readJsonStdin,
 } = require('./utils');
 
+const { boundMemoryContext, claimStartup } = require('../session-context');
+
 const PLUGIN_ROOT = path.resolve(__dirname, '..', '..');
 const SKILLS_DIR = path.join(PLUGIN_ROOT, 'skills');
 const UPDATE_CACHE = path.join(getSuperpowersConfigDir(), 'update-check.cache');
@@ -194,22 +196,7 @@ function assembleContextSnapshot(cwd) {
 }
 
 function assembleUsingSuperpowers() {
-  const skillPath = path.join(SKILLS_DIR, 'using-superpowers', 'SKILL.md');
-  const raw = readFileSafe(skillPath);
-  if (!raw) return 'Error reading using-superpowers skill';
-
-  const lines = raw.split('\n');
-  if (lines[0]?.trim() !== '---') return raw;
-
-  let endIndex = -1;
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].trim() === '---') {
-      endIndex = i;
-      break;
-    }
-  }
-
-  return endIndex === -1 ? raw : lines.slice(endIndex + 1).join('\n').trim();
+  return readFileSafe(path.join(PLUGIN_ROOT, 'hooks', 'startup-router.md')).trim();
 }
 
 function gitNotice(cwd) {
@@ -233,32 +220,19 @@ function spawnContextEngine(cwd) {
 }
 
 function buildSessionContext(cwd) {
-  return [
-    '<EXTREMELY_IMPORTANT>',
-    'You have superpowers-optimized.',
-    '',
-    '**The `superpowers-optimized:using-superpowers` guidance is loaded below. For all other skills, use the `Skill` tool.**',
-    '',
-    '**MANDATORY FIRST ACTIONS — before ANY tool calls beyond reading files:**',
-    '1. Silently activate token-efficiency (its rules apply immediately)',
-    '2. Classify the task complexity (micro/lightweight/full) per the Entry Sequence below',
-    '3. If the user names a specific skill (e.g. use brainstorming, use context management), that IS a Skill tool invocation — call `Skill` with that skill name. Do NOT re-implement the skill\'s purpose with ad-hoc agents or manual steps.',
-    '',
-    assembleUsingSuperpowers(),
-    checkForUpdates(),
-    gitNotice(cwd),
-    '</EXTREMELY_IMPORTANT>',
-    assembleProjectMap(cwd),
-    assembleSessionLog(cwd),
-    assembleState(cwd),
-    assembleKnownIssues(cwd),
-    assembleContextSnapshot(cwd),
-  ].join('');
+  return boundMemoryContext([
+    '<EXTREMELY_IMPORTANT>\n', assembleUsingSuperpowers(),
+    checkForUpdates(), gitNotice(cwd), '\n</EXTREMELY_IMPORTANT>',
+    assembleProjectMap(cwd), assembleSessionLog(cwd), assembleState(cwd),
+    assembleKnownIssues(cwd), assembleContextSnapshot(cwd),
+  ].join(''));
 }
 
 function main() {
   const data = readJsonStdin();
   const cwd = data && typeof data.cwd === 'string' && data.cwd ? data.cwd : process.cwd();
+
+  if (!claimStartup(data, cwd)) return;
 
   spawnContextEngine(cwd);
 

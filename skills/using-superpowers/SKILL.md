@@ -1,13 +1,10 @@
 ---
 name: using-superpowers
 description: >
-  BLOCKING REQUIREMENT — invoke this skill BEFORE writing any code, editing
-  files, debugging, planning, reviewing, or making any technical tool calls
-  beyond reading files. This is the mandatory workflow router for ALL technical
-  tasks. Matches: "implement", "build", "fix", "debug", "refactor", "optimize",
-  "add feature", "change", "update", "create", "develop", "plan", "review",
-  "test", or ANY request that involves code changes. Do NOT skip this skill
-  even if the task seems simple. Invoke FIRST, then follow its routing.
+  Detailed workflow routing for full technical tasks: uncertain requirements,
+  architecture, migrations, shared contracts, or wider changes. The injected
+  startup router handles micro and bounded tasks without loading this skill.
+  Use when full routing is needed or the user explicitly requests it.
 ---
 
 # Using Superpowers
@@ -18,7 +15,9 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 
 ## Trigger Conditions
 
-This skill MUST be invoked when any of the following occur:
+The startup router is sufficient for micro and bounded tasks. Load this detailed skill for full tasks or when explicitly requested. Do not reload it just to enter a workflow already selected.
+
+For full tasks, use this skill when any of the following occur:
 
 - A new session starts with a technical request
 - The user gives a new task or changes topic mid-session
@@ -85,27 +84,29 @@ Technical execution includes code edits, debugging, planning, review, test statu
    - Do not repeat this notice in subsequent tasks within the same session.
 
 3. Classify the task as **micro**, **lightweight**, or **full** (see Complexity Classification below).
-4. If resuming work from a prior session, read `state.md` if it exists. Before ending any session where significant decisions were made (design choices, rejected approaches, non-obvious constraints discovered), invoke `context-management` to write a `[saved]` entry — even if the work is complete. This is the only mechanism that preserves the "why" across sessions.
-5. If `known-issues.md` exists at the project root, read it to avoid rediscovering known error→solution mappings.
-6. If `project-map.md` exists at the project root, read it to orient to the project structure without re-globbing or re-reading known files. The map tells you what exists and where — when you need a file's actual content (for modification, comparison, or debugging), read it directly with the Read tool. Staleness is detected automatically by the session-start hook: if the map is stale, a `<project-map-stale>` tag is injected into session context with the mismatched hashes. When you see that tag:
-   - **With git:** run `git diff --name-only <map_hash> HEAD` to find changed files. Re-read only those; everything else in the map is still valid. Update the corresponding Key Files entries in `project-map.md` and refresh the git hash and date in the header.
+4. If resuming work, use the injected `<state>` content; read `state.md` only for missing, omitted, or changed sections. Before ending any session where significant decisions were made (design choices, rejected approaches, non-obvious constraints discovered), invoke `context-management` to write a `[saved]` entry — even if the work is complete. This is the only mechanism that preserves the "why" across sessions.
+5. Use injected `<known-issues>` content. Search `known-issues.md` only for relevant issues missing from that content or changed since injection.
+6. Use the injected `<project-map>` to orient without re-reading it. Read `project-map.md` only for missing, omitted, or changed sections. The map tells you what exists and where — when you need a file's actual content (for modification, comparison, or debugging), read it directly with the Read tool. Staleness is detected automatically by the session-start hook: if the map is stale, a `<project-map-stale>` tag is injected into session context with the mismatched hashes. When you see that tag:
+   - **With git:** use the changed-file list in the warning; run `git diff --name-only <map_hash> HEAD` only if the warning does not include a usable list. Re-read only those; everything else in the map is still valid. Update the corresponding Key Files entries in `project-map.md` and refresh the git hash and date in the header.
    - **Without git:** compare the map's generation timestamp to the modification time of files listed in the map's Hot Files section. Re-read any that are newer than the map. Then update their Key Files entries and refresh the generation timestamp in the header.
 7. Follow the path for the classified complexity level.
 
 ## Complexity Classification
 
-Classify every task into one of three levels. Do not invoke a separate skill for this — decide inline.
+Classify every task as micro, bounded, lightweight, or full. Do not invoke a separate skill for this — decide inline.
 
-### Hard overrides — check these first, before anything else
+### Full-task overrides
 
-If any of the following are true, classify as **full** immediately — do not evaluate the lightweight criteria:
+Use the full workflow for uncertain requirements, architectural decisions, migrations or data-shape changes, shared hooks/routing/configuration, shared or external contracts, and changes spanning modules. A condition or a user-visible change alone does not require the full workflow.
 
-- The change adds, modifies, or removes a condition, gate, or trigger that determines when behavior fires
-- The change affects what the user sees or experiences (excluding cosmetic text changes to existing UI — e.g., updating a label, rewording a message, or changing static copy that doesn't alter flow or behavior)
-- The change modifies a file that other components depend on (routing rules, entry sequences, config registries, shared hooks)
-- The change introduces a path or outcome that didn't exist before
+### Bounded (local behavior change)
 
-**When in doubt, classify as full.** An unnecessary brainstorming session costs one extra round. Skipping brainstorming on a task that needed it ships a gap. The asymmetry is not equal — always err toward full.
+All must hold:
+- The user gives explicit requirements; no unresolved design decision.
+- At most two files with local, understood dependencies.
+- No architectural change, migration, shared hook/routing rule, or shared/external contract change.
+
+Implement, verify, and review once for meaningful code changes. Apply test-driven-development for behavior changes and the relevant implementation skill. Skip brainstorming, formal plans, worktrees, and agent dispatch. A small local condition or user-visible behavior can qualify. If any criterion is uncertain, use full.
 
 ### Micro (skip everything)
 - Typo fix, single variable rename, 1-line config change
@@ -125,7 +126,7 @@ All of these must be true:
 **Exception:** If a dedicated implementation skill exists for this specific task (check the Routing Guide), invoke it — lightweight skips workflow overhead, not implementation skills.
 
 ### Full (complete pipeline)
-Anything that doesn't qualify as micro or lightweight.
+Anything that does not qualify as micro, bounded, or lightweight.
 
 **Action:** Follow the Routing Guide below for the full skill pipeline.
 
@@ -154,7 +155,7 @@ digraph planmode_intercept {
 
 - Uncertain whether work should exist at all: `premise-check` (run before brainstorming or planning)
 - Complex decision with unclear options or possible mis-framing: `deliberation` → `brainstorming` → `writing-plans`
-- New behavior or architecture (problem is well-framed): `brainstorming` → `writing-plans`
+- New behavior outside the bounded route, or architecture (problem is well-framed): `brainstorming` → `writing-plans`
 - Plan execution (same session, with optional parallel waves): `subagent-driven-development`
 - Plan execution (separate session): `executing-plans`
 - Experimental or risky work needing branch isolation: `using-git-worktrees` (run before implementation)

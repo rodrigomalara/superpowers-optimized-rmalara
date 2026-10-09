@@ -70,21 +70,15 @@ When changes touch security-relevant areas, the code review **must** include a s
 - Critical/High security findings **block merge** until addressed or the user explicitly accepts the risk with documented rationale.
 - Medium security findings should be fixed before merge unless explicitly deferred.
 
-## Adversarial Red Team (Optional)
+## Adversarial Checks (Built-In)
 
-For changes involving complex logic, concurrency, state management, or critical data paths, dispatch `superpowers-optimized:red-team` in parallel with the code reviewer.
+The single code reviewer checks correctness, security where applicable, and concrete failure scenarios. Include adversarial checks relevant to the changed code: specific edge-case inputs, race conditions, invalid state transitions, retry/recovery failures, and resource exhaustion. Do these checks within the same review; do not dispatch another agent for them.
 
-**Triggers when changes touch:**
-- State machines or multi-step workflows
-- Concurrent access to shared resources
-- Complex business logic with branching conditions
-- Data transformation pipelines
-- Retry/recovery/rollback logic
-- Performance-critical paths handling large inputs
+## Separate Red Team (Explicit Request Only)
 
-The red team agent finds concrete failure scenarios (specific inputs, race conditions, state corruption, resource exhaustion) that checklist-based review misses. It does NOT duplicate the security review — its focus is adversarial logic analysis, not OWASP/CWE compliance.
+Dispatch `superpowers-optimized:red-team` only when the user explicitly requests a separate red-team assessment. Complex logic, concurrency, state management, or critical data paths alone do not authorize a second agent.
 
-**Red team critical findings block merge** alongside security critical findings.
+When requested, the red team provides an independent adversarial assessment. Its Critical findings block merge alongside security Critical findings.
 
 ## Auto-Fix Pipeline
 
