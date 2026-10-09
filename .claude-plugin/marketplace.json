@@ -10,7 +10,7 @@
     {
       "name": "superpowers-optimized",
       "description": "Agentic development framework for Claude Code, with scope-creep controls in planning and review \u2014 disciplined workflow routing, TDD enforcement, safety hooks, systematic debugging, and code review",
-      "version": "6.8.1-scope.2",
+      "version": "6.8.1-scope.3",
       "source": "./",
       "author": {
         "name": "Rodrigo Malara"

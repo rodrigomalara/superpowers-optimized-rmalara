@@ -3,13 +3,17 @@ name: brainstorming
 description: >
   MUST USE when the user wants new features, behavior changes, refactoring
   with new capabilities, or architecture decisions and no approved design
-  exists yet. Produces an approved design document before any code is written.
+  exists yet, except explicit local changes satisfying the startup router's
+  bounded criteria. Produces an approved design document before any code is written.
   Triggers on: "build this", "add a feature", "I want to change", "how should we",
   "design", "architect", "new project", "refactor", "we need to add/build/create",
   "implement a new". Routed by using-superpowers, or invoke directly via /brainstorming.
 ---
 
 # Brainstorming
+
+**Bounded-task exception:** An explicit local change satisfying the startup router's bounded criteria proceeds directly to implementation, verification, and one review. Do not start brainstorming for that change unless requirements or design are uncertain.
+
 
 Turn rough requests into an approved design before implementation.
 

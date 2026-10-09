@@ -30,6 +30,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { dedupeSkillContext, ledgerPath, MEMORY_BYTES } = require('./session-context');
 
 // Resolve hooks directory from this script's location
 const HOOKS_DIR = __dirname;
@@ -204,8 +205,7 @@ function buildContext(matches) {
   return [
     '<user-prompt-submit-hook>',
     'Skill activation hint: The following skills are relevant to this prompt.',
-    'Remember: invoke superpowers-optimized:using-superpowers FIRST as the mandatory entry point,',
-    'then follow its routing to these suggested skills:',
+    'Use the startup router already in context; load only the relevant skills:',
     skillList,
     'IMPORTANT: If the user names a skill directly (e.g. "use brainstorming"), invoke it via the Skill tool.',
     'Do NOT re-implement the skill\'s purpose with ad-hoc agents or manual steps.',
@@ -439,15 +439,14 @@ const SESSION_START_KNOWN_ISSUES = 5;  // must match hooks/session-start node bl
 
 function hooksLogDir() {
   return path.join(
-    process.env.USERPROFILE || process.env.HOME || '.',
+    process.env.HOME || process.env.USERPROFILE || '.',
     '.claude',
     'hooks-logs'
   );
 }
 
-function recallLedgerPath(sessionId) {
-  const safe = String(sessionId).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 80);
-  return path.join(hooksLogDir(), `recall-${safe}.json`);
+function recallLedgerPath(sessionId, cwd = process.cwd()) {
+  return ledgerPath(cwd, sessionId, 'recall');
 }
 
 /** An entry's first line — the "## <date> [saved]" header — identifies it. */
@@ -464,7 +463,7 @@ function sessionStartSeed(cwd) {
   const seed = { sessionLog: [], knownIssues: [] };
   try {
     const log = fs.readFileSync(path.join(cwd, 'session-log.md'), 'utf8');
-    seed.sessionLog = log.split('\n')
+    seed.sessionLog = Buffer.byteLength(log) > MEMORY_BYTES - 512 ? [] : log.split('\n')
       // Must match hooks/session-start exactly: superseded entries are not injected,
       // so seeding on them would leave a genuinely injected entry un-deduped.
       .filter(l => /^## .+\[saved\]/.test(l) && !/\[superseded/.test(l))
@@ -475,7 +474,7 @@ function sessionStartSeed(cwd) {
   }
   try {
     const issues = fs.readFileSync(path.join(cwd, 'known-issues.md'), 'utf8');
-    seed.knownIssues = issues.split('\n')
+    seed.knownIssues = Buffer.byteLength(issues) > MEMORY_BYTES - 512 ? [] : issues.split('\n')
       .filter(l => l.startsWith('## ') && !l.startsWith('## ~~'))
       .map(l => l.trim())
       .slice(-SESSION_START_KNOWN_ISSUES);
@@ -487,7 +486,7 @@ function sessionStartSeed(cwd) {
 
 function loadRecallLedger(cwd, sessionId) {
   try {
-    const raw = JSON.parse(fs.readFileSync(recallLedgerPath(sessionId), 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(recallLedgerPath(sessionId, cwd), 'utf8'));
     if (raw && typeof raw === 'object') {
       return {
         sessionLog: Array.isArray(raw.sessionLog) ? raw.sessionLog : [],
@@ -517,11 +516,11 @@ function pruneRecallLedgers(dir) {
   }
 }
 
-function saveRecallLedger(sessionId, ledger) {
+function saveRecallLedger(sessionId, ledger, cwd) {
   try {
     const dir = hooksLogDir();
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(recallLedgerPath(sessionId), JSON.stringify(ledger));
+    fs.writeFileSync(recallLedgerPath(sessionId, cwd), JSON.stringify(ledger));
     pruneRecallLedgers(dir);
   } catch {
     // Never block the prompt on ledger write failures
@@ -551,7 +550,7 @@ function dedupeRecall(cwd, sessionId, sessionLogEntries, knownIssueEntries) {
   saveRecallLedger(sessionId, {
     sessionLog: [...seenLog, ...freshLog.map(entryKey)],
     knownIssues: [...seenIssues, ...freshIssues.map(entryKey)],
-  });
+  }, cwd);
 
   return { sessionLog: freshLog, knownIssues: freshIssues };
 }
@@ -832,7 +831,7 @@ async function main() {
     // Suppress entries already surfaced earlier in this session
     const fresh = dedupeRecall(cwd, sessionId, memoryEntries, knownIssueEntries);
 
-    const skillContext = buildContext(matches);
+    const skillContext = dedupeSkillContext(cwd, sessionId, prompt, matches, buildContext(matches));
     const memoryContext = buildMemoryContext(fresh.sessionLog);
     const knownIssuesContext = buildKnownIssuesContext(fresh.knownIssues);
 

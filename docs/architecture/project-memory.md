@@ -156,7 +156,7 @@ skills/ — One SKILL.md per workflow; loaded by Claude via Skill tool
 
 ## Key Files
 hooks/run-hook.cmd — Polyglot CMD/bash wrapper; enables bash hooks on Windows
-hooks/session-start — Injects using-superpowers routing on every session start
+hooks/session-start — Injects hooks/startup-router.md and bounded project memory on session start
 hooks/hooks.json — Hook registration; uses \" quoting (not ') for variable expansion on Linux
 .claude-plugin/plugin.json — Version field must stay in sync with all three manifests
 
@@ -235,7 +235,7 @@ Over time:
 
 **Works on existing projects.** Installing the plugin on a large existing codebase works exactly the same way — memory accumulates from the first saved session forward. `project-map.md` can be generated at any time to map the existing structure.
 
-**Token-efficient by design.** The session-start hook injects only the last two `[saved]` entries from session-log.md — not the full file. For older history, Claude greps rather than reads. The project map is capped at 150 lines. State is capped at 100 lines. known-issues.md is injected in full but stays short by design (one entry per error signature).
+**Token-efficient by design.** Startup loads the compact `hooks/startup-router.md`; detailed workflow skills are loaded on demand. Each injected memory section is capped at 4 KiB of UTF-8 text with an omission notice. Use injected content directly; search files only for missing, omitted, or changed sections. Keep active state at the top of `state.md` and completed details in `state-archive.md`. Consecutive identical skill hints are suppressed within the same project/session; explicit requests still surface them. Lifecycle hooks reset hint and recall ledgers after compaction/resume. Startup also suppresses duplicate registrations within 10 seconds when session identity and transcript position agree. Older installed versions do not participate in that guard; keep a single active hook registration. Without Node.js the shell hook cannot enforce the memory cap or duplicate guard.
 
 ---
 

@@ -1132,7 +1132,7 @@ test('Corrupt ledger falls back to seeding instead of throwing', () => {
   const dir = makeMemoryProject(null, null);
   const sid = 'dedupe-corrupt-' + Math.random().toString(36).slice(2);
   const { recallLedgerPath } = require('../../hooks/skill-activator');
-  const p = recallLedgerPath(sid);
+  const p = recallLedgerPath(sid, dir);
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, '{not json');
   const out = dedupeRecall(dir, sid, ['## 2026-01-01 [saved]\nGoal: x'], []);

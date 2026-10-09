@@ -14,6 +14,7 @@ const {
   searchKnownIssues, buildKnownIssuesContext, dedupeRecall,
   isExecutionTrigger, getContextPressure, buildContextPressureBlock,
 } = require('../skill-activator');
+const { dedupeSkillContext } = require('../session-context');
 const { readJsonStdin } = require('./utils');
 
 function evaluatePayload(data) {
@@ -46,7 +47,7 @@ function evaluatePayload(data) {
   // Suppress entries already surfaced earlier in this session
   const fresh = dedupeRecall(cwd, sessionId, memoryEntries, knownIssueEntries);
 
-  const skillContext = buildContext(matches);
+  const skillContext = dedupeSkillContext(cwd, sessionId, prompt, matches, buildContext(matches));
   const memoryContext = buildMemoryContext(fresh.sessionLog);
   const knownIssuesContext = buildKnownIssuesContext(fresh.knownIssues);
 

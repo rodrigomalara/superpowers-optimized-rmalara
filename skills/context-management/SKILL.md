@@ -126,7 +126,7 @@ Open: <carry-forward items only>
    ```
    This prevents the stop hook from re-firing the decision-log reminder on every subsequent stop in the same session.
 
-6. In a new session, read `state.md` first to restore task context, then grep `session-log.md` for relevant history.
+6. In a new session, use injected `<state>` content first. Read only missing, omitted, or changed sections of `state.md`; grep `session-log.md` for relevant history when needed.
 
 ## session-log.md Format and Maintenance
 
@@ -214,4 +214,4 @@ When the staleness check in the entry sequence flags changed files:
 - Do not drop user-provided constraints.
 - Do not rewrite requirements; preserve intent.
 - If uncertain whether old context matters, keep a short reference in `Open Issues`.
-- Keep `state.md` under 100 lines — if it's longer, it's not compressed enough.
+- Keep `state.md` under 100 lines and 4 KiB of UTF-8 text. Put the current goal, next action, blockers, constraints, and verification evidence first. Move completed task details to `state-archive.md`; link the archive instead of repeating its contents. Startup injects at most 4 KiB per memory section and points to omitted content.

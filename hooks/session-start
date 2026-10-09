@@ -3,6 +3,8 @@
 
 set -euo pipefail
 
+session_payload=$(cat)
+
 # Determine plugin root directory
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -467,11 +469,7 @@ if [ -f "context-snapshot.json" ]; then
 fi
 
 # ── Load using-superpowers skill body ─────────────────────────────────────────
-using_superpowers_content=$(awk '
-NR == 1 && $0 == "---" { in_frontmatter = 1; next }
-in_frontmatter && $0 == "---" { in_frontmatter = 0; next }
-!in_frontmatter { print }
-' "${PLUGIN_ROOT}/skills/using-superpowers/SKILL.md" 2>/dev/null || echo "Error reading using-superpowers skill")
+using_superpowers_content=$(cat "${PLUGIN_ROOT}/hooks/startup-router.md")
 
 # ── JSON escaping ──────────────────────────────────────────────────────────────
 escape_for_json() {
@@ -494,13 +492,14 @@ state_escaped=$(escape_for_json "$state_content")
 known_issues_escaped=$(escape_for_json "$known_issues_content")
 context_snapshot_escaped=$(escape_for_json "$context_snapshot_content")
 
-session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers-optimized.\n\n**The \`superpowers-optimized:using-superpowers\` guidance is loaded below. For all other skills, use the \`Skill\` tool.**\n\n**MANDATORY FIRST ACTIONS — before ANY tool calls beyond reading files:**\n1. Silently activate token-efficiency (its rules apply immediately)\n2. Classify the task complexity (micro/lightweight/full) per the Entry Sequence below\n3. If the user names a specific skill (e.g. use brainstorming, use context management), that IS a Skill tool invocation — call \`Skill\` with that skill name. Do NOT re-implement the skill's purpose with ad-hoc agents or manual steps.\n\n${using_superpowers_escaped}\n\n${warning_escaped}${update_escaped}${git_escaped}\n</EXTREMELY_IMPORTANT>${project_map_escaped}${session_log_escaped}${state_escaped}${known_issues_escaped}${context_snapshot_escaped}"
+session_context="<EXTREMELY_IMPORTANT>\n${using_superpowers_escaped}\n${warning_escaped}${update_escaped}${git_escaped}\n</EXTREMELY_IMPORTANT>${project_map_escaped}${session_log_escaped}${state_escaped}${known_issues_escaped}${context_snapshot_escaped}"
 
 # ── Output ─────────────────────────────────────────────────────────────────────
 # Uses printf instead of heredoc (cat <<EOF) to work around a bash 5.3+
 # bug where heredoc variable expansion hangs when content exceeds ~512 bytes.
 # Platform detection: emit only the field consumed by the current platform
 # to avoid double context injection.
+emit_context() {
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
   # Cursor sets CURSOR_PLUGIN_ROOT (may also set CLAUDE_PLUGIN_ROOT) — emit additional_context only
   printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
@@ -512,4 +511,9 @@ else
   printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
 fi
 
-exit 0
+}
+if command -v node >/dev/null 2>&1; then
+  emit_context | node "${PLUGIN_ROOT}/hooks/session-context.js" "$session_payload"
+else
+  emit_context
+fi

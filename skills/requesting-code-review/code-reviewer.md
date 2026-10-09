@@ -51,6 +51,10 @@ git diff --stat {BASE_SHA}..{HEAD_SHA}
 git diff {BASE_SHA}..{HEAD_SHA}
 ```
 
+## Adversarial Checks
+
+Within this review, check concrete failure scenarios relevant to the changed code: edge-case inputs, race conditions, invalid state transitions, retry/recovery failures, and resource exhaustion. Report material issues with specific triggers and impacts in the findings below. Do not dispatch a separate red-team agent; these checks are part of your review.
+
 ## Required Output
 
 ### Findings (highest severity first)
