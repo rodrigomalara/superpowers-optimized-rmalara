@@ -164,18 +164,26 @@ ${whats_new}</important-reminder>"
         # No git repo — compare local version against the remote plugin.json via curl.
         # Tell the user to run /plugin update if a newer version is available.
 
+        # This fork checks its own repo, not upstream REPOZY. Versions carry a
+        # -scope.N suffix (e.g. 6.8.1-scope.4) that orders fork releases.
+        local fork_marketplace="superpowers-optimized-rmalara"
+        local fork_url="https://raw.githubusercontent.com/rodrigomalara/superpowers-optimized-rmalara/refs/heads/main/.claude-plugin/plugin.json"
+        local version_re='[0-9]+\.[0-9]+\.[0-9]+(-scope\.[0-9]+)?'
+        # Separate cache file so a version cached from upstream is never compared
+        local fork_cache_file="${cache_dir}/update-check-${fork_marketplace}.cache"
+
         # Read local version — prefer installed_plugins.json (authoritative: reflects the
         # currently active installed version even if this hook is running from an older
         # cached directory after a plugin update). Falls back to this script's own plugin.json.
         local local_version=""
         local registry_file="${HOME}/.claude/plugins/installed_plugins.json"
         if [ -f "$registry_file" ]; then
-            local_version=$(grep -A 10 '"superpowers-optimized@superpowers-optimized"' "$registry_file" 2>/dev/null \
-                | grep '"version"' | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+            local_version=$(grep -A 10 "\"superpowers-optimized@${fork_marketplace}\"" "$registry_file" 2>/dev/null \
+                | grep '"version"' | head -1 | grep -oE "$version_re" || echo "")
         fi
         if [ -z "$local_version" ]; then
             local_version=$(grep '"version"' "${PLUGIN_ROOT}/.claude-plugin/plugin.json" 2>/dev/null \
-                | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+                | head -1 | grep -oE "$version_re" || echo "")
         fi
         [ -z "$local_version" ] && return
 
@@ -183,43 +191,45 @@ ${whats_new}</important-reminder>"
         # Cache stores the last-seen remote version string so we can still
         # surface a notification even when the fetch is skipped.
         local cached_remote=""
-        if [ -f "$cache_file" ]; then
+        if [ -f "$fork_cache_file" ]; then
             local file_mtime
-            file_mtime=$(stat -c %Y "$cache_file" 2>/dev/null || stat -f %m "$cache_file" 2>/dev/null || echo 0)
+            file_mtime=$(stat -c %Y "$fork_cache_file" 2>/dev/null || stat -f %m "$fork_cache_file" 2>/dev/null || echo 0)
             local cache_age=$(( $(date +%s) - file_mtime ))
             if [ "$cache_age" -lt "$cache_ttl" ]; then
-                cached_remote=$(cat "$cache_file" 2>/dev/null || echo "")
+                cached_remote=$(cat "$fork_cache_file" 2>/dev/null || echo "")
             fi
         fi
 
         # Fetch remote version if cache is stale or missing
         local remote_version="$cached_remote"
         if [ -z "$remote_version" ]; then
-            remote_version=$(curl -sf --max-time 3 \
-                "https://raw.githubusercontent.com/REPOZY/superpowers-optimized/refs/heads/main/.claude-plugin/plugin.json" \
+            remote_version=$(curl -sf --max-time 3 "$fork_url" \
                 2>/dev/null \
-                | grep '"version"' | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+                | grep '"version"' | head -1 | grep -oE "$version_re" || echo "")
             # Cache the result (even if empty, to avoid hammering GitHub on no-internet)
             if [ -n "$remote_version" ]; then
                 mkdir -p "$cache_dir"
-                printf '%s' "$remote_version" > "$cache_file"
+                printf '%s' "$remote_version" > "$fork_cache_file"
             fi
         fi
 
         [ -z "$remote_version" ] && return
         [ "$remote_version" = "$local_version" ] && return
 
-        # Semver comparison: is remote > local?
+        # Version comparison: is remote > local? X.Y.Z first, then -scope.N (missing = 0)
+        local local_scope=0 remote_scope=0
+        case "$local_version" in *-scope.*) local_scope="${local_version##*-scope.}" ;; esac
+        case "$remote_version" in *-scope.*) remote_scope="${remote_version##*-scope.}" ;; esac
         local IFS='.'
-        local local_parts=($local_version)
-        local remote_parts=($remote_version)
-        for i in 0 1 2; do
+        local local_parts=(${local_version%%-*} "$local_scope")
+        local remote_parts=(${remote_version%%-*} "$remote_scope")
+        for i in 0 1 2 3; do
             local l="${local_parts[$i]:-0}"
             local r="${remote_parts[$i]:-0}"
             if [ "$r" -gt "$l" ]; then
                 update_notice="\n\n<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER: 🔄 **Superpowers Optimized v${remote_version} is available** (you have v${local_version}). Run \`/plugin update superpowers-optimized\` which opens the plugin manager UI. From there:
 
-Marketplaces tab → select REPOZY/superpowers-optimized → Update marketplace (refreshes the version catalog)
+Marketplaces tab → select ${fork_marketplace} → Update marketplace (refreshes the version catalog)
 Installed tab → select superpowers-optimized → Update now
 
 Tip: To skip manual steps in future, enable Auto-update for the marketplace in step 1.</important-reminder>"

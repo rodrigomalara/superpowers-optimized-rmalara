@@ -197,6 +197,39 @@ test('Commit reminder suppressed when all session edits are committed (git clean
   }
 });
 
+test('Commit reminder fires on 5+ uncommitted files and SP_NO_COMMIT_REMINDER=1 suppresses it', () => {
+  const { homeDir, cwdDir } = makeTempDirs();
+  const optOutHome = makeTempDirs();
+  const prevOptOut = process.env.SP_NO_COMMIT_REMINDER;
+  try {
+    const { spawnSync } = require('child_process');
+    spawnSync('git', ['init', '-q'], { cwd: cwdDir });
+    const files = ['a.js','b.js','c.js','d.js','e.js','f.js'];
+    for (const f of files) fs.writeFileSync(path.join(cwdDir, f), '//\n');
+    const lines = files.map(f =>
+      `${new Date().toISOString()} | ${TEST_SESSION_ID} | Edit | ${path.join(cwdDir, f)}\n`
+    ).join('');
+    // Separate HOMEs: the shouldFire() cooldown file would otherwise suppress the second call
+    for (const home of [homeDir, optOutHome.homeDir])
+      fs.writeFileSync(path.join(home, '.claude', 'hooks-logs', 'edit-log.txt'), lines, 'utf8');
+
+    delete process.env.SP_NO_COMMIT_REMINDER;
+    let { evaluatePayload } = loadHookWithHome(homeDir);
+    let reason = evaluatePayload({ cwd: cwdDir, session_id: TEST_SESSION_ID }).reason || '';
+    assert.ok(reason.includes('Commit reminder'), `expected commit reminder by default, got: ${reason}`);
+
+    process.env.SP_NO_COMMIT_REMINDER = '1';
+    ({ evaluatePayload } = loadHookWithHome(optOutHome.homeDir));
+    reason = evaluatePayload({ cwd: cwdDir, session_id: TEST_SESSION_ID }).reason || '';
+    assert.ok(reason.length > 0, 'opt-out case must still block for other reminders (TDD)');
+    assert.ok(!reason.includes('Commit reminder'), `opt-out must suppress commit reminder, got: ${reason}`);
+  } finally {
+    if (prevOptOut === undefined) delete process.env.SP_NO_COMMIT_REMINDER;
+    else process.env.SP_NO_COMMIT_REMINDER = prevOptOut;
+    cleanup(homeDir, cwdDir, optOutHome.homeDir, optOutHome.cwdDir);
+  }
+});
+
 // ── isSignificantSession pattern coverage ────────────────────────────────────
 
 console.log('\nisSignificantSession pattern coverage');

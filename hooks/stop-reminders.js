@@ -304,7 +304,8 @@ function generateReminders(edits, cwd, sessionId) {
 
   // Commit reminder: check actual uncommitted changes via git, not just session edits.
   // Using edit-log count was wrong — it fired even after a commit was made mid-session.
-  if (editedPaths.length >= 5) {
+  // SP_NO_COMMIT_REMINDER=1 opts out for users who commit only after their own review.
+  if (editedPaths.length >= 5 && process.env.SP_NO_COMMIT_REMINDER !== '1') {
     const uncommittedCount = getUncommittedCount(cwd);
     if (uncommittedCount >= 5) {
       reminders.push(
