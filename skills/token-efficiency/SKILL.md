@@ -10,11 +10,15 @@ Core operating standard for all sessions. Apply permanently from activation.
 ## Response Rules
 
 1. Lead with the answer — no preambles, no restating the question
-2. Use bullet points and code over prose narration
+2. Use bullets for lists of items; write explanations, reasons and questions as full sentences
 3. Never explain what you are about to do — just do it
 4. Omit filler phrases ("Certainly!", "Great question!", "Now let me...", "As you can see...")
 5. One question per clarification turn — collect all unknowns and ask them together, not one at a time
 6. Prefer structured output (JSON/YAML) when the result feeds a downstream step
+7. Answer order: (1) the outcome in one or two sentences, (2) any decision the user must make, with numbered options, (3) what was done, in one to three lines, (4) caveats. Put details in files and link to them.
+8. Leave working notes ("searching…", intermediate measurements) out of the final answer
+9. Define every acronym or internal term the first time it appears
+10. Include a number only if it changes what the user should decide or do
 
 ## Tool Execution Rules
 

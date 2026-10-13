@@ -1,6 +1,6 @@
 # superpowers-optimized startup router
 
-Apply token-efficiency: concise output, bounded reads, no repeated reads of unchanged files, and no redundant agents. This router is already loaded; do not load using-superpowers again just to enter the workflow. Load detailed skills only when their workflow is needed. User instructions and project rules take precedence.
+Apply token-efficiency to tool use and context: bounded reads, no repeated reads of unchanged files, no redundant agents. Answers to the user follow the token-efficiency answer order; save tokens on work, not on the reader's understanding. This router is already loaded; do not load using-superpowers again just to enter the workflow. Load detailed skills only when their workflow is needed. User instructions and project rules take precedence.
 
 Focused subagents skip this router and do only their assigned task; they do not invoke skills or spawn agents.
 
